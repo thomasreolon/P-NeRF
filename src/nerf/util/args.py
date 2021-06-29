@@ -5,17 +5,19 @@ import os
 import argparse
 from pyhocon import ConfigFactory
 
+ACTUAL_PATH = os.path.dirname(os.path.abspath(__file__))
+os.chdir(ACTUAL_PATH+'/../../../')
 
 def parse_args(
     callback=None,
     training=False,
-    default_conf="/home/thomasreolon/P-NeRF/conf/default_mv.conf",
+    default_conf="conf/default_mv.conf",
     default_expname="example",
     default_data_format="dvr",
     default_num_epochs=300, #100000,
     default_lr=1e-4,
     default_gamma=1.00,
-    default_datadir="/home/thomasreolon/P-NeRF/input/",
+    default_datadir="input/",
     default_ray_batch_size=50000,
 ):
     parser = argparse.ArgumentParser()
