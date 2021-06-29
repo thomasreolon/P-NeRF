@@ -203,8 +203,8 @@ with torch.no_grad():
         src_view = source
 
     net.encode(
-        images,# [src_view].unsqueeze(0),
-        poses.to(device=device),#[src_view].unsqueeze(0).to(device=device),
+        images[src_view].unsqueeze(0),
+        poses[src_view].unsqueeze(0).to(device=device),
         focal,
         c=c,
     )

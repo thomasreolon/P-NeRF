@@ -6,7 +6,7 @@ import argparse
 from pyhocon import ConfigFactory
 
 ACTUAL_PATH = os.path.dirname(os.path.abspath(__file__))
-os.chdir(ACTUAL_PATH+'/../../../')
+os.chdir(ACTUAL_PATH+'/../../../') # used directory == P-NeRF 
 
 def parse_args(
     callback=None,
