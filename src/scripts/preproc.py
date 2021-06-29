@@ -1,6 +1,7 @@
 import cv2
 import os
 import os.path as osp
+from pathlib import Path
 
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
 vids = [x for x in os.listdir(ROOT_PATH+'/../../input') if 'dataset' not in x]   # camera1, camera2, ..., camera8
@@ -300,18 +301,19 @@ if __name__ == "__main__":
         #  cv2.imwrite(out_mask_path, mask_crop)
         cv2.imwrite(out_masked_path, masked_crop)
 
-
-###### os.remove(f"{OUT_PATH}/*.jpg")  # TODO
+# remove old frame
+for p in Path(f"{OUT_PATH}").glob("*.jpg"):
+    p.unlink()
 
 import shutil
-shutil.rmtree(OUT_PATH+'/poses', ignore_errors=True)
-shutil.copytree(ROOT_PATH+'/../../default_poses', OUT_PATH+'/poses')
+shutil.rmtree(OUT_PATH+'/pose', ignore_errors=True)
+shutil.copytree(ROOT_PATH+'/../../default_poses', OUT_PATH+'/pose')
 
-intrisic = """"131.250000 64.000000 64.000000 0.000000
+intrisics = """131.250000 64.000000 64.000000 0.000000
 0. 0. 0.
 1.
 128 128
 """
 
-with open(OUT_PATH+'/intrinsic.txt', 'w+') as fout:
-    fout.write(intrisic)
+with open(OUT_PATH+'/intrinsics.txt', 'w+') as fout:
+    fout.write(intrisics)

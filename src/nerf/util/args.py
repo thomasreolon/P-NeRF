@@ -9,13 +9,13 @@ from pyhocon import ConfigFactory
 def parse_args(
     callback=None,
     training=False,
-    default_conf="conf/default_mv.conf",
+    default_conf="/home/thomasreolon/P-NeRF/conf/default_mv.conf",
     default_expname="example",
     default_data_format="dvr",
     default_num_epochs=300, #100000,
     default_lr=1e-4,
     default_gamma=1.00,
-    default_datadir="data",
+    default_datadir="/home/thomasreolon/P-NeRF/input/",
     default_ray_batch_size=50000,
 ):
     parser = argparse.ArgumentParser()
@@ -85,7 +85,8 @@ def parse_args(
     os.makedirs(os.path.join(args.visual_path, args.name), exist_ok=True)
 
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    EXPCONF_PATH = os.path.join(PROJECT_ROOT, "expconf.conf")
+    # EXPCONF_PATH = os.path.join(PROJECT_ROOT, "expconf.conf")
+    EXPCONF_PATH = os.path.join(PROJECT_ROOT+"/../conf/exp", "custom.conf")
     expconf = ConfigFactory.parse_file(EXPCONF_PATH)
 
     if args.conf is None:
