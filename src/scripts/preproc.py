@@ -3,13 +3,13 @@ import os
 import os.path as osp
 
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
-vids = [x for x in os.listdir(ROOT_PATH+'/../../videos') if 'dataset' not in x]   # camera1, camera2, ..., camera8
+vids = [x for x in os.listdir(ROOT_PATH+'/../../input') if 'dataset' not in x]   # camera1, camera2, ..., camera8
 
 OUT_PATH = ROOT_PATH+'/../../input/dataset' # where to save our custom dataset
 os.makedirs(OUT_PATH, exist_ok=True)
 
 for num, vid in enumerate(vids):
-    cap = cv2.VideoCapture(ROOT_PATH+'/../../videos/'+vid)
+    cap = cv2.VideoCapture(ROOT_PATH+'/../../input/'+vid)
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     half = length//2
 
@@ -19,7 +19,7 @@ for num, vid in enumerate(vids):
         if ret == False:
             break
         if i==half:
-            cv2.imwrite(OUT_PATH+str(num)+'.jpg', frame)
+            cv2.imwrite(OUT_PATH+'/'+str(num)+'.jpg', frame)
         i+=1
     
     cap.release()
@@ -237,11 +237,11 @@ if __name__ == "__main__":
 
     pointrend = PointRendWrapper(args.coco_class)
 
-    input_images = glob.glob(os.path.join(INPUT_DIR, "*"))
+    input_images = glob.glob(os.path.join(OUT_PATH, "*"))
     input_images = [
         f
         for f in input_images
-        if _is_image_path(f) and not f.endswith("_normalize.png")
+        if _is_image_path(f)
     ]
 
     os.makedirs(INPUT_DIR, exist_ok=True)
@@ -301,4 +301,4 @@ if __name__ == "__main__":
         cv2.imwrite(out_masked_path, masked_crop)
 
 
-
+###### os.remove(f"{OUT_PATH}/*.jpg")  # TODO
