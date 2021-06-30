@@ -1,13 +1,35 @@
-import cv2
+import cv2, sys
 import os
 import os.path as osp
 from pathlib import Path
+
+def format_dataset():
+    # raw_input returns the empty string for "enter"
+    yes = {'yes','y', 'ye', ''}
+    no = {'no','n'}
+
+    choice = input("Do you want to reset the old dataset? [y/n] ").lower()
+    print("In progress...")
+    if choice in yes:
+        return True
+    elif choice in no:
+        return False
+    else:
+        sys.stdout.write("Please respond with 'yes' or 'no'\n")
+        return format_dataset()
 
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
 vids = [x for x in os.listdir(ROOT_PATH+'/../../input') if 'dataset' not in x]   # camera1, camera2, ..., camera8
 
 OUT_PATH = ROOT_PATH+'/../../input/dataset/mymodel' # where to save our custom dataset
-os.makedirs(OUT_PATH, exist_ok=True)
+if os.path.exists(OUT_PATH):
+    r = format_dataset()
+    if(r):
+        os.makedirs(OUT_PATH, exist_ok=True)
+    else:
+        quit()
+else:
+    os.makedirs(OUT_PATH, exist_ok=True)
 
 for num, vid in enumerate(vids):
     cap = cv2.VideoCapture(ROOT_PATH+'/../../input/'+vid)
