@@ -299,7 +299,7 @@ class PixelNeRFTrainer(trainlib.Trainer):
         alpha_coarse_cmap = util.cmap(alpha_coarse_np) / 255
         depth_coarse_cmap = util.cmap(depth_coarse_np) / 255
         vis_list = [
-            *source_views,
+            source_views,
             gt,
             depth_coarse_cmap,
             rgb_coarse_np,
