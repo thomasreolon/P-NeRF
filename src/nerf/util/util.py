@@ -249,7 +249,7 @@ def gen_rays(poses, width, height, focal, z_near, z_far, c=None, ndc=False):
     )
     cam_centers = poses[:, None, None, :3, 3].expand(-1, height, width, -1) # 50,128,128,3 (CARS)
     cam_raydir = torch.matmul(
-        poses[:, None, None, :3, :3], cam_unproj_map.unsqueeze(-1)
+        poses[:, None, None, :3, :3], cam_unproj_map.unsqueeze(-1)  # 50,1,1,3,3  @ 50,heigth,width,3,1  =  50,heigth,width,3,1    (50 wise, H&W broadcast,  3x3@3x1=3x1)
     )[:, :, :, :, 0]
     if ndc:
         if not (z_near == 0 and z_far == 1):

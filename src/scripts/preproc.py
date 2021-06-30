@@ -146,7 +146,6 @@ class PointRendWrapper:
             )
         )
         self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # set threshold for this model
-        # Use a model from PointRend model zoo: https://github.com/facebookresearch/detectron2/tree/master/projects/PointRend#pretrained-models
         self.cfg.MODEL.WEIGHTS = "detectron2://PointRend/InstanceSegmentation/pointrend_rcnn_R_50_FPN_3x_coco/164955410/model_final_3c3198.pkl"
         self.predictor = DefaultPredictor(self.cfg)
 
@@ -217,7 +216,7 @@ if __name__ == "__main__":
         "--scale",
         "-S",
         type=float,
-        default=4.37,
+        default=2.5,
         help="bbox scaling rel minor axis of fitted ellipse. "
         + "Will take max radius from this and major_scale.",
     )
@@ -225,7 +224,7 @@ if __name__ == "__main__":
         "--major_scale",
         "-M",
         type=float,
-        default=0.8,
+        default=.8,
         help="bbox scaling rel major axis of fitted ellipse. "
         + "Will take max radius from this and major_scale.",
     )

@@ -10,14 +10,14 @@ from util import get_image_to_tensor_balanced, get_mask_to_tensor
 
 class MYDataset(torch.utils.data.Dataset):
     """
-    Dataset inspider from SRN
+    Dataset inspired from SRN
     """
 
     def __init__(
         self, path, stage="train", image_size=(128, 128), world_scale=1.0,
     ):
         """
-        :param stage train | val | test
+        :param stage only train
         :param image_size result image size (resizes if different)
         :param world_scale amount to scale entire world by
         """
@@ -40,8 +40,8 @@ class MYDataset(torch.utils.data.Dataset):
             torch.tensor([1, -1, -1, 1], dtype=torch.float32)
         )
 
-        self.z_near = 0.8
-        self.z_far = 1.8
+        self.z_near = 1.25
+        self.z_far = 2.75
         self.lindisp = False
 
 
