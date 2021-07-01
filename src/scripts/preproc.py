@@ -1,14 +1,65 @@
-import cv2, sys
+import cv2
 import os
 import os.path as osp
 from pathlib import Path
+import sys
+import argparse
+import json
+from math import ceil
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--coco_class",
+    type=int,
+    default=[56],  # 0 person,   2 car,    56 chair
+    help="COCO class wanted (0 = human, 2 = car)",
+)
+parser.add_argument(
+    "--size",
+    "-s",
+    type=int,
+    default=128,
+    help="output image side length (will be square)",
+)
+parser.add_argument(
+    "--scale",
+    "-S",
+    type=float,
+    default=2.5,
+    help="bbox scaling rel minor axis of fitted ellipse. "
+    + "Will take max radius from this and major_scale.",
+)
+parser.add_argument(
+    "--major_scale",
+    "-M",
+    type=float,
+    default=.8,
+    help="bbox scaling rel major axis of fitted ellipse. "
+    + "Will take max radius from this and major_scale.",
+)
+parser.add_argument(
+    "--proceed",
+    "-P",
+    type=int,
+    default=0,
+    help="run this script? -1 no, 0 boh, 1 yes",
+)
+parser.add_argument(
+    "--const_border",
+    action="store_true",
+    help="constant white border instead of replicate pad",
+)
+args = parser.parse_args()
 
 def format_dataset():
     # raw_input returns the empty string for "enter"
-    yes = {'yes','y', 'ye', ''}
-    no = {'no','n'}
+    yes = {'yes','y', 'ye', '', 's'}
+    no = {'no','n', 'o'}
 
-    choice = input("Do you want to reset the old dataset? [y/n] ").lower()
+    if args.proceed==0:
+        choice = input("Do you want to reset the old dataset? [Y/n] ").lower()
+    else:
+        choice = args.proceed==1 and 'yes' or 'no'
     print("In progress...")
     if choice in yes:
         return True
@@ -54,12 +105,7 @@ Usage: python [-S scale=4.37] [-s size=128]
 outputs to *_mask.png, then *_mask_*.png (for other instances).
 also writes _crop.txt
 """
-import sys
-import argparse
-import os
-import os.path as osp
-import json
-from math import floor, ceil
+
 
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
 POINTREND_ROOT_PATH = osp.join(ROOT_PATH, "detectron2", "projects", "PointRend")
@@ -219,108 +265,70 @@ class PointRendWrapper:
             return masks
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--coco_class",
-        type=int,
-        default=[56],  # 0 person,   2 car,    56 chair
-        help="COCO class wanted (0 = human, 2 = car)",
+pointrend = PointRendWrapper(args.coco_class)
+
+input_images = glob.glob(os.path.join(OUT_PATH, "*"))
+input_images = [
+    f
+    for f in input_images
+    if _is_image_path(f)
+]
+
+os.makedirs(INPUT_DIR, exist_ok=True)
+
+for image_path in tqdm.tqdm(input_images):
+    print(image_path)
+    im = cv2.imread(image_path)
+    img_no_ext = os.path.split(os.path.splitext(image_path)[0])[1]
+    masks = pointrend.segment(im)
+    if len(masks) == 0:
+        print("WARNING: PointRend detected no objects in", image_path, "skipping")
+        continue
+    mask_main = masks[0]
+    assert mask_main.shape[:2] == im.shape[:2]
+    assert mask_main.shape[-1] == 1
+    assert mask_main.dtype == "uint8"
+
+    # mask is (H, W, 1) with values{0, 255}
+
+    cnt, _ = cv2.findContours(mask_main, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    ellipse = cv2.fitEllipse(cnt[0])
+    cen_pt = ellipse[0]
+    min_ax, max_ax = min(ellipse[1]), max(ellipse[1])
+
+    ccen, rcen = map(int, map(round, cen_pt))
+    rad = max(min_ax * args.scale, max_ax * args.major_scale) * 0.5
+    rad = int(ceil(rad))
+    rect_main = [ccen - rad, rcen - rad, 2 * rad, 2 * rad]
+
+    im_crop = _crop_image(im, rect_main, args.const_border, value=255)
+    mask_crop = _crop_image(mask_main, rect_main, True, value=0)
+
+    mask_flt = mask_crop.astype(np.float32) / 255.0
+    masked_crop = im_crop.astype(np.float32) * mask_flt + 255 * (1.0 - mask_flt)
+    masked_crop = masked_crop.astype(np.uint8)
+
+    #  im_crop = cv2.resize(im_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR)
+    mask_crop = cv2.resize(
+        mask_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR
     )
-    parser.add_argument(
-        "--size",
-        "-s",
-        type=int,
-        default=128,
-        help="output image side length (will be square)",
+    masked_crop = cv2.resize(
+        masked_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR
     )
-    parser.add_argument(
-        "--scale",
-        "-S",
-        type=float,
-        default=2.5,
-        help="bbox scaling rel minor axis of fitted ellipse. "
-        + "Will take max radius from this and major_scale.",
-    )
-    parser.add_argument(
-        "--major_scale",
-        "-M",
-        type=float,
-        default=.8,
-        help="bbox scaling rel major axis of fitted ellipse. "
-        + "Will take max radius from this and major_scale.",
-    )
-    parser.add_argument(
-        "--const_border",
-        action="store_true",
-        help="constant white border instead of replicate pad",
-    )
-    args = parser.parse_args()
 
-    pointrend = PointRendWrapper(args.coco_class)
+    if len(mask_crop.nonzero()[0]) == 0:
+        print("WARNING: cropped mask is empty for", image_path, "skipping")
+        continue
 
-    input_images = glob.glob(os.path.join(OUT_PATH, "*"))
-    input_images = [
-        f
-        for f in input_images
-        if _is_image_path(f)
-    ]
-
-    os.makedirs(INPUT_DIR, exist_ok=True)
-
-    for image_path in tqdm.tqdm(input_images):
-        print(image_path)
-        im = cv2.imread(image_path)
-        img_no_ext = os.path.split(os.path.splitext(image_path)[0])[1]
-        masks = pointrend.segment(im)
-        if len(masks) == 0:
-            print("WARNING: PointRend detected no objects in", image_path, "skipping")
-            continue
-        mask_main = masks[0]
-        assert mask_main.shape[:2] == im.shape[:2]
-        assert mask_main.shape[-1] == 1
-        assert mask_main.dtype == "uint8"
-
-        # mask is (H, W, 1) with values{0, 255}
-
-        cnt, _ = cv2.findContours(mask_main, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        ellipse = cv2.fitEllipse(cnt[0])
-        cen_pt = ellipse[0]
-        min_ax, max_ax = min(ellipse[1]), max(ellipse[1])
-
-        ccen, rcen = map(int, map(round, cen_pt))
-        rad = max(min_ax * args.scale, max_ax * args.major_scale) * 0.5
-        rad = int(ceil(rad))
-        rect_main = [ccen - rad, rcen - rad, 2 * rad, 2 * rad]
-
-        im_crop = _crop_image(im, rect_main, args.const_border, value=255)
-        mask_crop = _crop_image(mask_main, rect_main, True, value=0)
-
-        mask_flt = mask_crop.astype(np.float32) / 255.0
-        masked_crop = im_crop.astype(np.float32) * mask_flt + 255 * (1.0 - mask_flt)
-        masked_crop = masked_crop.astype(np.uint8)
-
-        #  im_crop = cv2.resize(im_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR)
-        mask_crop = cv2.resize(
-            mask_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR
-        )
-        masked_crop = cv2.resize(
-            masked_crop, (args.size, args.size), interpolation=cv2.INTER_LINEAR
-        )
-
-        if len(mask_crop.nonzero()[0]) == 0:
-            print("WARNING: cropped mask is empty for", image_path, "skipping")
-            continue
-
-        #  out_im_path = os.path.join(INPUT_DIR,
-        #                             img_no_ext + ".jpg")
-        #  out_mask_path = os.path.join(INPUT_DIR,
-        #                               img_no_ext + "_mask.png")
-        out_masked_path = os.path.join(INPUT_DIR, img_no_ext + ".png")
-        print(out_masked_path)
-        #  cv2.imwrite(out_im_path, im_crop)
-        #  cv2.imwrite(out_mask_path, mask_crop)
-        cv2.imwrite(out_masked_path, masked_crop)
+    #  out_im_path = os.path.join(INPUT_DIR,
+    #                             img_no_ext + ".jpg")
+    #  out_mask_path = os.path.join(INPUT_DIR,
+    #                               img_no_ext + "_mask.png")
+    out_masked_path = os.path.join(INPUT_DIR, img_no_ext + ".png")
+    print(out_masked_path)
+    #  cv2.imwrite(out_im_path, im_crop)
+    #  cv2.imwrite(out_mask_path, mask_crop)
+    cv2.imwrite(out_masked_path, masked_crop)
 
 # remove old frame
 for p in Path(f"{OUT_PATH}").glob("*.jpg"):

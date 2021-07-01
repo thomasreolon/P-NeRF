@@ -3,7 +3,7 @@ import requests
 import os.path as osp
 import zipfile
 import shutil
-from datetime import datetime
+from io import StringIO
 
 DEFAULT_EPOCHS = 350
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
@@ -71,37 +71,39 @@ def checkpoints():
             raise Exception("A pretrained model for humans is not available yet, please select another one")
         elif chk_type == 2 and not osp.exists(ROOT_PATH+f'/checkpoints/{run_name}'):
             shutil.copytree(ROOT_PATH+'/checkpoints/srn_chair', ROOT_PATH+f'/checkpoints/{run_name}')
-        return run_name, chk_type
+        return run_name, (chk_type==2 and 56 or 0)
     except ValueError:
-        return n, None  # n is the name of the model
+        return n, 56  # n is the name of the model,   56 --> default chairs
     except Exception as e:
         sys.stdout.write(f"Please insert a valid value:\n{e}")
         return checkpoints()
 
 if __name__=='__main__':
-
     # activate python env ((this works only for our pc))
-    res = input("Do you want to activate pixelnerf environment? [y/N]\n>> ")
-    if(res.lower()=='y'):
-        activate_this_file = "pixelnerf_env/bin/activate_this.py"
+    activate_this_file = "pixelnerf_env/bin/activate_this.py"
+    if(osp.exists(activate_this_file)):
         execfile(activate_this_file, dict(__file__=activate_this_file))
 
-    # get number of epochs
-    ep = n_epochs()
+    ##### DEFAULT SETTINGS, usage =  ||  python run.py --default run_123  ||
+    if len(sys.argv) == 3 and sys.argv[1] == '--default':
+        run_name, chk_type, ep, gen_vid = sys.argv[2], 56, 0, 'y'
+    else:
+        # download checkpoints if necessary
+        run_name, chk_type = checkpoints()
 
-    # download checkpoints if necessary
-    run_name, chk_type = checkpoints()
+        # get number of epochs
+        ep = n_epochs()
 
-    # ask before if you want the video
-    gen_vid = input("Do you want to generate the video? [y/N]\n>> ")
+        # ask before if you want the video
+        gen_vid = input("Do you want to generate the video? [y/N]\n>> ")
 
     # create dataset using videos in folder input
-    chk_type = (chk_type==2) and 56 or 0
-    os.system('python src/scripts/preproc.py --coco_class {chk_type}')
+    proceed = (len(sys.argv)>1 and sys.argv[1] == '--default') and -1 or 0
+    os.system(f'python src/scripts/preproc.py --coco_class {chk_type} --proceed {proceed}')
 
     # set up script to run the training
-    os.system(f'python src/scripts/train.py -n {run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {ep} -V 8 --gpu_id=0')
+    os.system(f'python src/scripts/train.py -n {run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {ep} --gpu_id=0 --resume')
 
     # generationg video
     if(gen_vid.lower()=='y'):
-        os.system(f'python src/scripts/gen_video.py -n {run_name} --gpu_id=0 --split test -P 4 -D ./input/dataset -S 0')
+        os.system(f'python src/scripts/gen_video.py -n {run_name} --gpu_id=0 --split test -P "6 4" -D ./input/dataset -S 0')
