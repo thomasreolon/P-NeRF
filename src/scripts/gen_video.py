@@ -32,7 +32,7 @@ def extra_args(parser):
         "--source",
         "-P",
         type=str,
-        default="64",
+        default="0",
         help="Source view(s) in image, in increasing order. -1 to do random",
     )
     parser.add_argument(
@@ -44,7 +44,7 @@ def extra_args(parser):
     parser.add_argument(
         "--elevation",
         type=float,
-        default=-10.0,
+        default=-13.0,
         help="Elevation angle (negative is above)",
     )
     parser.add_argument(
@@ -187,7 +187,6 @@ focal = focal.to(device=device)
 source = torch.tensor(list(map(int, args.source.split())), dtype=torch.long)
 NS = len(source)
 random_source = NS == 1 and source[0] == -1
-print('------------------>\n',source, '\n', NV)
 assert not (source >= NV).any()
 
 if renderer.n_coarse < 64:

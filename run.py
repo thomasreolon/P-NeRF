@@ -92,6 +92,9 @@ if __name__=='__main__':
     # download checkpoints if necessary
     run_name, chk_type = checkpoints()
 
+    # ask before if you want the video
+    gen_vid = input("Do you want to generate the video? [y/N]\n>> ")
+
     # create dataset using videos in folder input
     chk_type = (chk_type==2) and 56 or 0
     os.system('python src/scripts/preproc.py --coco_class {chk_type}')
@@ -99,3 +102,6 @@ if __name__=='__main__':
     # set up script to run the training
     os.system(f'python src/scripts/train.py -n {run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {ep} -V 8 --gpu_id=0')
 
+    # generationg video
+    if(gen_vid.lower()=='y'):
+        os.system(f'python src/scripts/gen_video.py -n {run_name} --gpu_id=0 --split test -P 4 -D ./input/dataset -S 0')
