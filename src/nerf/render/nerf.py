@@ -182,7 +182,7 @@ class NeRFRenderer(torch.nn.Module):
             deltas = torch.cat([deltas, delta_inf], -1)  # (B, K)
 
             # (B, K, 3)
-            points = rays[:, None, :3] + z_samp.unsqueeze(2) * rays[:, None, 3:6]
+            points = rays[:, None, :3] + z_samp.unsqueeze(2) * rays[:, None, 3:6]  ### THIS IS THE RAY: starts from the cam position and go in direction raydir ---> points in the ray determined by z_samp
             points = points.reshape(-1, 3)  # (B*K, 3)
 
             use_viewdirs = hasattr(model, "use_viewdirs") and model.use_viewdirs
