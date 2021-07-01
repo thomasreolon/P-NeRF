@@ -3,9 +3,23 @@ import os
 import os.path as osp
 from pathlib import Path
 import sys
-import argparse
 import json
 from math import ceil
+import argparse
+import shutil
+
+# import some common libraries
+import numpy as np
+import cv2
+import tqdm
+import glob
+
+# import some common detectron2 utilities
+from detectron2.engine import DefaultPredictor
+from detectron2.config import get_cfg
+from detectron2.utils.visualizer import Visualizer, ColorMode
+from detectron2.data import MetadataCatalog
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -38,50 +52,21 @@ parser.add_argument(
     + "Will take max radius from this and major_scale.",
 )
 parser.add_argument(
-    "--proceed",
-    "-P",
-    type=int,
-    default=0,
-    help="run this script? -1 no, 0 boh, 1 yes",
-)
-parser.add_argument(
     "--const_border",
     action="store_true",
     help="constant white border instead of replicate pad",
 )
 args = parser.parse_args()
 
-def format_dataset():
-    # raw_input returns the empty string for "enter"
-    yes = {'yes','y', 'ye', '', 's'}
-    no = {'no','n', 'o'}
-
-    if args.proceed==0:
-        choice = input("Do you want to reset the old dataset? [Y/n] ").lower()
-    else:
-        choice = args.proceed==1 and 'yes' or 'no'
-    print("In progress...")
-    if choice in yes:
-        return True
-    elif choice in no:
-        return False
-    else:
-        sys.stdout.write("Please respond with 'yes' or 'no'\n")
-        return format_dataset()
-
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))
+OUT_PATH = ROOT_PATH+'/../../input/dataset/mymodel' # where to save our custom dataset
+POINTREND_ROOT_PATH = osp.join(ROOT_PATH, "detectron2", "projects", "PointRend")
+INPUT_DIR = OUT_PATH + '/rgb'
 vids = [x for x in os.listdir(ROOT_PATH+'/../../input') if 'dataset' not in x]   # camera1, camera2, ..., camera8
 
-OUT_PATH = ROOT_PATH+'/../../input/dataset/mymodel' # where to save our custom dataset
-if os.path.exists(OUT_PATH):
-    r = format_dataset()
-    if(r):
-        os.makedirs(OUT_PATH, exist_ok=True)
-    else:
-        quit()
-else:
-    os.makedirs(OUT_PATH, exist_ok=True)
 
+##### extract images from videos
+os.makedirs(OUT_PATH, exist_ok=True)
 for num, vid in enumerate(vids):
     cap = cv2.VideoCapture(ROOT_PATH+'/../../input/'+vid)
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -98,19 +83,8 @@ for num, vid in enumerate(vids):
     
     cap.release()
 
-"""
-PointRend background removal + normalization for car images
-(c) Alex Yu 2020
-Usage: python [-S scale=4.37] [-s size=128]
-outputs to *_mask.png, then *_mask_*.png (for other instances).
-also writes _crop.txt
-"""
 
-
-ROOT_PATH = osp.dirname(os.path.abspath(__file__))
-POINTREND_ROOT_PATH = osp.join(ROOT_PATH, "detectron2", "projects", "PointRend")
-INPUT_DIR = OUT_PATH + '/rgb'
-
+##### use detectron for segmentation
 if not os.path.exists(POINTREND_ROOT_PATH):
     import urllib.request, zipfile
 
@@ -138,19 +112,6 @@ import point_rend
 from detectron2.utils.logger import setup_logger
 
 setup_logger()
-
-# import some common libraries
-import numpy as np
-import cv2
-import tqdm
-import glob
-
-# import some common detectron2 utilities
-from detectron2.engine import DefaultPredictor
-from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer, ColorMode
-from detectron2.data import MetadataCatalog
-
 
 def _crop_image(img, rect, const_border=False, value=0):
     """
@@ -334,7 +295,8 @@ for image_path in tqdm.tqdm(input_images):
 for p in Path(f"{OUT_PATH}").glob("*.jpg"):
     p.unlink()
 
-import shutil
+
+#### complete dataset adding intrinsic & estrinsic matrices
 shutil.rmtree(OUT_PATH+'/pose', ignore_errors=True)
 shutil.copytree(ROOT_PATH+'/../../default_poses', OUT_PATH+'/pose')
 
