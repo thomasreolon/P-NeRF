@@ -9,6 +9,6 @@ coming...
 
 
 ```sh
-python run.py -n my_model -e 1000 -m 2 --preprocess --gen_video
+python src/run.py -n my_model -e 20000 -m chair --gen_video --preprocess
 ```
 

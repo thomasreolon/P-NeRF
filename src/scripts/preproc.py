@@ -159,6 +159,8 @@ class PointRendWrapper:
         """
         :param filter_class output only intances of filter_class (-1 to disable). Note: class 0 is person.
         """
+        if isinstance(filter_class, int):
+            filter_class = [filter_class]
         self.filter_class = filter_class
         self.coco_metadata = MetadataCatalog.get("coco_2017_val")
         self.cfg = get_cfg()
