@@ -4,6 +4,7 @@ import os.path as osp
 import zipfile
 import shutil
 import argparse
+import subprocess
 
 DEFAULT_EPOCHS = 350
 ROOT_PATH = osp.dirname(os.path.abspath(__file__))+'/..'
@@ -102,16 +103,28 @@ if __name__=='__main__':
     checkpoints(args.base_model, args.run_name)
 
     if args.preprocess:
+        # create dataset -----> similar to os.system('python src/scripts/preproc.py --coco_class 56')
         print('============================ PREPROCESS ============================')
         chk_type = (args.base_model=='chair' and 56) or (args.base_model=='person' and 0) or (args.base_model=='car' and 2)
-        os.system(f'python src/scripts/preproc.py --coco_class {chk_type}')
-
+        batcmd=f'python src/scripts/preproc.py --coco_class {chk_type}'
+        p = subprocess.Popen(batcmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        std, err = p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
+        print(std, '\n', err)
+        
     # set up script to run the training
     print('============================ TRAINING ============================')
     resume = (not args.scratch) and '--resume' or ''
-    os.system(f'python src/scripts/train.py -n {args.run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {args.epochs} --gpu_id=0 {resume}')
+    batcmd=f'python src/scripts/train.py -n {args.run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {args.epochs} --gpu_id=0 {resume}'
+    p = subprocess.Popen(batcmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    std, err = p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
+    print(std, '\n', err)
+
 
     # generationg video
     if(args.gen_video):
         print('============================ GENERATING VIDEO ============================')
-        os.system(f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P "6 4" -D ./input/dataset -S 0')
+        batcmd = f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P 6^4 -D ./input/dataset -S 0'
+        batcmd = [x.replace('^', ' ') for x in batcmd.split()]
+        p = subprocess.Popen(batcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        std, err = p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
+        print(std, '\n', err)
