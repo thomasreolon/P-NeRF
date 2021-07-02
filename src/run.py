@@ -102,13 +102,16 @@ if __name__=='__main__':
     checkpoints(args.base_model, args.run_name)
 
     if args.preprocess:
+        print('============================ PREPROCESS ============================')
         chk_type = (args.base_model=='chair' and 56) or (args.base_model=='person' and 0) or (args.base_model=='car' and 2)
         os.system(f'python src/scripts/preproc.py --coco_class {chk_type}')
 
     # set up script to run the training
+    print('============================ TRAINING ============================')
     resume = (not args.scratch) and '--resume' or ''
     os.system(f'python src/scripts/train.py -n {args.run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {args.epochs} --gpu_id=0 {resume}')
 
     # generationg video
     if(args.gen_video):
+        print('============================ GENERATING VIDEO ============================')
         os.system(f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P "6 4" -D ./input/dataset -S 0')
