@@ -14,6 +14,38 @@ import cv2
 import tqdm
 import glob
 
+ROOT_PATH = osp.dirname(os.path.abspath(__file__))
+OUT_PATH = ROOT_PATH+'/../../input/dataset/mymodel' # where to save our custom dataset
+POINTREND_ROOT_PATH = osp.join(ROOT_PATH, "detectron2", "projects", "PointRend")
+INPUT_DIR = OUT_PATH + '/rgb'
+
+try:
+    import detectron2
+except:
+    print(
+        "Please install Detectron2 by selecting the right version",
+        "from https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md",
+    )
+# import PointRend project
+
+##### use detectron for segmentation
+if not os.path.exists(POINTREND_ROOT_PATH):
+    import urllib.request, zipfile
+
+    print("Downloading minimal PointRend source package")
+    zipfile_name = "pointrend_min.zip"
+    urllib.request.urlretrieve(
+        "https://alexyu.net/data/pointrend_min.zip", zipfile_name
+    )
+    with zipfile.ZipFile(zipfile_name) as zipfile:
+        zipfile.extractall(ROOT_PATH)
+    os.remove(zipfile_name)
+
+sys.path.insert(0, POINTREND_ROOT_PATH)
+import point_rend
+
+from detectron2.utils.logger import setup_logger
+
 # import some common detectron2 utilities
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
@@ -58,10 +90,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-ROOT_PATH = osp.dirname(os.path.abspath(__file__))
-OUT_PATH = ROOT_PATH+'/../../input/dataset/mymodel' # where to save our custom dataset
-POINTREND_ROOT_PATH = osp.join(ROOT_PATH, "detectron2", "projects", "PointRend")
-INPUT_DIR = OUT_PATH + '/rgb'
 vids = [x for x in os.listdir(ROOT_PATH+'/../../input') if 'dataset' not in x]   # camera1, camera2, ..., camera8
 
 
@@ -82,34 +110,6 @@ for num, vid in enumerate(vids):
         i+=1
     
     cap.release()
-
-
-##### use detectron for segmentation
-if not os.path.exists(POINTREND_ROOT_PATH):
-    import urllib.request, zipfile
-
-    print("Downloading minimal PointRend source package")
-    zipfile_name = "pointrend_min.zip"
-    urllib.request.urlretrieve(
-        "https://alexyu.net/data/pointrend_min.zip", zipfile_name
-    )
-    with zipfile.ZipFile(zipfile_name) as zipfile:
-        zipfile.extractall(ROOT_PATH)
-    os.remove(zipfile_name)
-
-sys.path.insert(0, POINTREND_ROOT_PATH)
-
-try:
-    import detectron2
-except:
-    print(
-        "Please install Detectron2 by selecting the right version",
-        "from https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md",
-    )
-# import PointRend project
-import point_rend
-
-from detectron2.utils.logger import setup_logger
 
 setup_logger()
 

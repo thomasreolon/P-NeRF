@@ -51,15 +51,16 @@ def n_epochs():
 
 # download pretrained models
 def checkpoints(base_model, run_name):
+    OFFICIAL_CHECKPOINT = "1UO_rL201guN6euoWkCOn-XpqR2e8o6ju"
+    CHECKPOINT = "1S6-Qdtyc6NOESl1ktCSNucQ1r2NPlOOr"
     # download pretrained checkpoints
     if not os.path.exists(ROOT_PATH+"/checkpoints"):
         print("Downloading checkpoints...\n")
         os.makedirs(ROOT_PATH+"/checkpoints")
-        download_file_from_google_drive("1UO_rL201guN6euoWkCOn-XpqR2e8o6ju", ROOT_PATH+"/checkpoints/pixel_nerf_weights.zip")
+        download_file_from_google_drive(CHECKPOINT, ROOT_PATH+"/checkpoints/pixel_nerf_weights.zip")
         print("Extracting...")
         with zipfile.ZipFile(ROOT_PATH+"/checkpoints/pixel_nerf_weights.zip", 'r') as zip_ref:
             zip_ref.extractall(ROOT_PATH+"/checkpoints")
-        os.rmdir(ROOT_PATH+"/checkpoints/srn_car")
         os.remove(ROOT_PATH+"/checkpoints/pixel_nerf_weights.zip")
 
     # create new checkpoint from pretrained
