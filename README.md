@@ -1,14 +1,53 @@
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-No-red.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![Generic badge](https://img.shields.io/badge/python-3.7%20|%203.8-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-v1.0-cc.svg)](https://shields.io/)
+
 # P-NeRF
-Slight modifications to the PixelNeRF official repository, to use their code for unitn videos
+Project for the Computer Vision course at unitn.
+The objective of this project is to create a wrapper around pixelnerf, which was developed by Yu et al. and is available at this [link](https://github.com/sxyu/pixel-nerf).
+In our specific case, we want to automate the training of a NeRF model (the pixelnerf variation which requires less views).
+
+...videofuture...
 
 ## Set Up
 
-coming...
+**installing detectron2**
+
+detectron2 is used in preprocess.py to remove the images background, the parameter --coco_class specifies which object type to segment (0-->person,  2-->car, (default) 56-->chair)
+
+```sh
+pip install -U torch torchvision
+pip install git+https://github.com/facebookresearch/fvcore.git
+git clone https://github.com/facebookresearch/detectron2 detectron2_repo
+pip install -e detectron2_repo
+```
+
+
+**installing required python packages**
+
+some python packages required by the code can by installed from `requirements.txt`, inside the repository.
+
+
+```sh
+git clone https://github.com/thomasreolon/P-NeRF.git
+cd P-NeRF
+pip install -r requirements.txt
+```
 
 ## How To Run:
 
+The script `run.py` inside the `src` folder coordinates three steps:
+- preprocessing: which extract the frames from the video, removes the backgound and build a custom dataset
+- training: load the custom step and train the NeRF model for a predefined number of epochs
+- video generation: use the model trained in the previous step, plus some views, to generate the final video.
+
+
+example:
 
 ```sh
 python src/run.py -n my_model -e 20000 -m chair --gen_video --preprocess
 ```
 
+We create a new model, called `my_model` which load the pretrained `chair` model and is trained for `20000` epochs.
+`--preprocess` is a flag that tells the script to create a new dataset, while `--gen_video` is a flag that tells the script to create a video after the tr
+
+
+git commit -m "update readme"
