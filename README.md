@@ -39,6 +39,8 @@ The script `run.py` inside the `src` folder coordinates three steps:
 - training: load the custom step and train the NeRF model for a predefined number of epochs
 - video generation: use the model trained in the previous step, plus some views, to generate the final video.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oi_CgZw2H8RixG2UxxzqCEOOSbVRtfaH?usp=sharing) <--- A simple demo of running the code
+
 
 example:
 
@@ -50,4 +52,25 @@ We create a new model, called `my_model` which load the pretrained `chair` model
 `--preprocess` is a flag that tells the script to create a new dataset, while `--gen_video` is a flag that tells the script to create a video after the tr
 
 
-git commit -m "update readme"
+## Project Structure
+
+    EVOLUTIVE-NAS
+    ├── src
+    |    ├── run.py                [main script]
+    |    ├── nerf                  [implementation of NeRF]
+    |    |    ├── data               [dataset declaration]
+    |    |    ├── model              [MLP model & encoder]
+    |    |    ├── render             [IMPORTANT: use the rays to sample points, then ask to the MLP to predict the rgb/density; computes the fiinal rgb color]
+    |    |    ├── util               [utility funcions]
+    |    |    |    ├── args            [some settings of the ]
+    |    |    |    ├── recon           [class that implements crossover between 2 genotypes]
+    |    |    |    ├── util            [class that implements crossover between 2 genotypes]
+    |    |
+    |    ├── scripts                [steps of the algorithm]
+    |    |    ├── detectron2           [model that does segmentation]
+    |    |    ├── trainlib             [class that handles the training]
+    |    |    ├── gen_video            [use a finetuned model to produce the video]
+    |    |    ├── gray2rgb             [change images from grayscale to rgb]
+    |    |    ├── preproc              [create the custom dataset from the videos inside /input]
+    |    |    ├── train.py             [trains the model extending trainlib class]
+
