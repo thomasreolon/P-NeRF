@@ -42,14 +42,15 @@ The script `run.py` inside the `src` folder coordinates three steps:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oi_CgZw2H8RixG2UxxzqCEOOSbVRtfaH?usp=sharing) <--- A simple demo of running the code
 
 
-example:
+Example:
 
 ```sh
 python src/run.py -n my_model -e 20000 -m chair --gen_video --preprocess
 ```
 
-We create a new model, called `my_model` which load the pretrained `chair` model and is trained for `20000` epochs.
-`--preprocess` is a flag that tells the script to create a new dataset, while `--gen_video` is a flag that tells the script to create a video after the tr
+We create a new model, called `my_model` which load the pretrained `chair` model and is trained for `20000` epochs.  
+`--preprocess` is a flag that tells the script to create a new dataset, while `--gen_video` is a flag that tells the script to create a video after the training.  
+In order to train a new model from scratch one can omit `-m chair`.
 
 
 ## Project Structure
