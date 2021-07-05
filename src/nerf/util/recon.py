@@ -13,7 +13,7 @@ def marching_cubes(
     occu_net,
     c1=[-1, -1, -1],
     c2=[1, 1, 1],
-    reso=[128, 128, 128],
+    reso=[256, 256, 256],
     isosurface=50.0,
     sigma_idx=3,
     eval_batch_size=100000,

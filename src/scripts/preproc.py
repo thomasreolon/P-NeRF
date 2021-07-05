@@ -64,7 +64,7 @@ parser.add_argument(
     "--size",
     "-s",
     type=int,
-    default=128,
+    default=256,
     help="output image side length (will be square)",
 )
 parser.add_argument(
@@ -147,7 +147,7 @@ def _is_image_path(f):
     return (
         f.endswith(".jpg")
         or f.endswith(".jpeg")
-        or f.endswith(".png")
+        #or f.endswith(".png")
         or f.endswith(".bmp")
         or f.endswith(".tiff")
         or f.endswith(".gif")
@@ -239,11 +239,26 @@ input_images = [
 
 os.makedirs(INPUT_DIR, exist_ok=True)
 
-for image_path in tqdm.tqdm(input_images):
+for num, image_path in enumerate(tqdm.tqdm(input_images)):
     print(image_path)
     im = cv2.imread(image_path)
     img_no_ext = os.path.split(os.path.splitext(image_path)[0])[1]
     masks = pointrend.segment(im)
+
+    if len(masks)>0:
+        mask = masks[0]
+        rows = np.any(mask, axis=1)
+        cols = np.any(mask, axis=0)
+        rnz = np.where(rows)[0]
+        cnz = np.where(cols)[0]
+        rmin, rmax = rnz[[0, -1]]
+        cmin, cmax = cnz[[0, -1]]
+        padding = 50
+
+        masked = im[rmin-padding:rmax+padding, cmin-padding:cmax+padding]
+        try:   cv2.imwrite(OUT_PATH+'/'+str(num)+'.png', masked)
+        except:pass
+
     if len(masks) == 0:
         print("WARNING: PointRend detected no objects in", image_path, "skipping")
         continue
@@ -302,10 +317,10 @@ for p in Path(f"{OUT_PATH}").glob("*.jpg"):
 shutil.rmtree(OUT_PATH+'/pose', ignore_errors=True)
 shutil.copytree(ROOT_PATH+'/../../default_poses', OUT_PATH+'/pose')
 
-intrisics = """131.250000 64.000000 64.000000 0.000000
+intrisics = """300.250000 128.000000 128.000000 0.000000
 0. 0. 0.
 1.
-128 128
+256 256
 """
 
 with open(OUT_PATH+'/intrinsics.txt', 'w+') as fout:

@@ -111,7 +111,7 @@ if __name__=='__main__':
     resume = (not args.scratch) and '--resume' or ''
     os.system(f'python src/scripts/train.py -n {args.run_name} -c ./conf/exp/custom.conf -D ./input/dataset --epochs {args.epochs} --gpu_id=0 {resume}')
 
-    # generationg video
+    # generating video
     if(args.gen_video):
         print('============================ GENERATING VIDEO ============================')
         os.system(f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P "6 4" -D ./input/dataset -S 0')

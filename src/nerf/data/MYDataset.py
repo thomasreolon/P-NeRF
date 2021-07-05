@@ -14,7 +14,7 @@ class MYDataset(torch.utils.data.Dataset):
     """
 
     def __init__(
-        self, path, stage="train", image_size=(128, 128), world_scale=1.0,
+        self, path, stage="train", image_size=(256, 256), world_scale=1.0,
     ):
         """
         :param stage only train
