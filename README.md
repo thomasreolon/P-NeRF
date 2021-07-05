@@ -39,10 +39,10 @@ The script `run.py` inside the `src` folder coordinates three steps:
 - training: load the custom step and train the NeRF model for a predefined number of epochs
 - video generation: use the model trained in the previous step, plus some views, to generate the final video.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oi_CgZw2H8RixG2UxxzqCEOOSbVRtfaH?usp=sharing) <--- A simple demo of running the code
+A simple demo for running the code: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oi_CgZw2H8RixG2UxxzqCEOOSbVRtfaH?usp=sharing)
 
 
-Example:
+### Example:
 
 ```sh
 python src/run.py -n my_model -e 20000 -m chair --gen_video --preprocess
