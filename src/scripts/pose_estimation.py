@@ -42,7 +42,7 @@ bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 matches = {}
 
 for i, des1 in enumerate(descriptors):
-    for i2 in range(0, len(descriptors)):
+    for i2 in range(i+1, len(descriptors)):
         matches[(i,i2)] = bf.match(des1,descriptors[i2])
 
 relative_poses = {}
