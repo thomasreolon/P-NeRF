@@ -114,4 +114,4 @@ if __name__=='__main__':
     # generating video
     if(args.gen_video):
         print('============================ GENERATING VIDEO ============================')
-        os.system(f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P "6 4" -D ./input/dataset -S 0')
+        os.system(f'python src/scripts/gen_video.py -n {args.run_name} --gpu_id=0 --split test -P "0 6 4" -D ./input/dataset -S 0')
