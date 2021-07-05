@@ -1,7 +1,10 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-No-red.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![Generic badge](https://img.shields.io/badge/python-3.7%20|%203.8-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-v1.0-cc.svg)](https://shields.io/)
 
 # P-NeRF
-Project for the Computer Vision course at the University of Trento (Italy).
+
+##### :speech_balloon: A report explaining the project can be found here: [report.pdf](report.pdf) :speech_balloon:
+
+This is the project for the Computer Vision course at the University of Trento (Italy).
 The objective of this project is to create a wrapper around pixelnerf, which was developed by Yu et al. and is available at this [link](https://github.com/sxyu/pixel-nerf).
 In our specific case, we want to automate the training of a NeRF model (the pixelnerf variation which requires less views).
 
