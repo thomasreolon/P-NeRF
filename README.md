@@ -6,15 +6,9 @@ The objective of this project is to create a wrapper around pixelnerf, which was
 In our specific case, we want to automate the training of a NeRF model (the pixelnerf variation which requires less views).
 
 ### Example of 3D scene reconstruction
-### Input
-8 views of the same scene (chair)  
+Starting from 8 views of the same scene, the model reconstructs the scene:
 
-<img src="https://www.linkpicture.com/q/8views.jpg" width=50% height=50%>  
-
-### Output  
-The 3D reconstructed scene  
-
-![3D reconstracted scene](https://media.giphy.com/media/AIoli4VtDhxSoNG7F8/giphy.gif)
+![image](https://media.giphy.com/media/WrxRcc5mnexksBeHyd/giphy.gif)
 
 ## Set Up
 
@@ -84,3 +78,7 @@ In order to train a new model from scratch one can omit `-m chair`.
     |    |    ├── preproc              [create the custom dataset from the videos inside /input]
     |    |    ├── train.py             [trains the model extending trainlib class]
 
+## Output example
+Example of 3D scene reconstruction:  
+
+![output](https://media.giphy.com/media/GpLiNp6mzroNzz7oU1/giphy.gif)
