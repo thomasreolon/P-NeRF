@@ -5,7 +5,16 @@ Project for the Computer Vision course at unitn.
 The objective of this project is to create a wrapper around pixelnerf, which was developed by Yu et al. and is available at this [link](https://github.com/sxyu/pixel-nerf).
 In our specific case, we want to automate the training of a NeRF model (the pixelnerf variation which requires less views).
 
-...videofuture...
+### Example of 3D scene reconstraction
+### Input
+8 views of the same scene (chair)  
+
+<img src="https://www.linkpicture.com/q/8views.jpg" width=50% height=50%>  
+
+### Output  
+The 3D reconstracted scene  
+
+![3D reconstracted scene](https://media.giphy.com/media/AIoli4VtDhxSoNG7F8/giphy.gif)
 
 ## Set Up
 
